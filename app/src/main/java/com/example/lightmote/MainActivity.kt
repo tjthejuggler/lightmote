@@ -14,28 +14,28 @@ import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
-    val colors = arrayOf(
-        ByteArray(3) { 127; 0; 0 },
-        ByteArray(3) { 0; 127; 0 },
-        ByteArray(3) { 0; 0; 127 },
-        ByteArray(3) { 127; 127; 0 },
-        ByteArray(3) { 127; 0; 127 },
-        ByteArray(3) { 0; 127; 127 },
-        ByteArray(3) { 127; 127; 127 } ,
-        ByteArray(3) { 127; 0; 0 },
-        ByteArray(3) { 0; 127; 0 },
-        ByteArray(3) { 0; 0; 127 },
-        ByteArray(3) { 127; 127; 0 },
-        ByteArray(3) { 127; 0; 127 },
-        ByteArray(3) { 0; 127; 127 },
-        ByteArray(3) { 127; 127; 127 } ,
-        ByteArray(3) { 127; 0; 0 },
-        ByteArray(3) { 0; 127; 0 },
-        ByteArray(3) { 0; 0; 127 },
-        ByteArray(3) { 127; 127; 0 },
-        ByteArray(3) { 127; 0; 127 },
-        ByteArray(3) { 0; 127; 127 },
-        ByteArray(3) { 127; 127; 127 }
+    val colors: Array<ByteArray> = arrayOf(
+        byteArrayOf (127, 0, 0 ),
+        byteArrayOf (0, 127, 0 ),
+        byteArrayOf (0, 0, 127 ),
+        byteArrayOf (127, 127, 0 ),
+        byteArrayOf (127, 0, 127 ),
+        byteArrayOf (0, 127, 127 ),
+        byteArrayOf (127, 127, 127 ) ,
+        byteArrayOf (127, 0, 0 ),
+        byteArrayOf (0, 127, 0 ),
+        byteArrayOf (0, 0, 127 ),
+        byteArrayOf (127, 127, 0 ),
+        byteArrayOf (127, 0, 127 ),
+        byteArrayOf (0, 127, 127 ),
+        byteArrayOf (127, 127, 127 ) ,
+        byteArrayOf (127, 0, 0 ),
+        byteArrayOf (0, 127, 0 ),
+        byteArrayOf (0, 0, 127 ),
+        byteArrayOf (127, 127, 0 ),
+        byteArrayOf (127, 0, 127 ),
+        byteArrayOf (0, 127, 127 ),
+        byteArrayOf (127, 127, 127 )
     )
 
     var ipAddresses = arrayOf(
@@ -44,9 +44,9 @@ class MainActivity : AppCompatActivity() {
         "192.168.43.45"
     )
 
-    fun sendColorChange(ip: String, color: ByteArray){
+    fun sendColorChange(ip: String, color: ByteArray, index: Int){
         val tvHello=findViewById(R.id.mytextView) as TextView;
-        tvHello.text=ip
+        tvHello.text= colors[index].get(0).toString() + colors[index].get(1).toString() + colors[index].get(2).toString()
         val buffer = ByteArray(12)
         val buf: ByteBuffer =
             ByteBuffer.wrap(buffer)
@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
                 buttonIndex in 7..13 -> ipIndex = 1
                 buttonIndex in 14..20 -> ipIndex = 2
             }
-            sendColorChange(ipAddresses[ipIndex], colors[buttonIndex.toInt()])
+            sendColorChange(ipAddresses[ipIndex], colors[buttonIndex], buttonIndex)
             // Do something depending on the value of the tag
         }
     }
@@ -113,7 +113,6 @@ class MainActivity : AppCompatActivity() {
             buttons[i].setOnClickListener(myListener)
             buttons[i].tag = i
         }
-
     }
 }
 
