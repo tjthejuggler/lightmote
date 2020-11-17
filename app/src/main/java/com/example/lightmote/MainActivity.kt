@@ -73,8 +73,8 @@ class MainActivity : AppCompatActivity() {
             var ipIndex: Int = 0
             when {
                 buttonIndex < 7 -> ipIndex = 0
-                buttonIndex > 6 && buttonIndex < 14 -> ipIndex = 1
-                buttonIndex > 13 && buttonIndex < 21 -> ipIndex = 2
+                buttonIndex in 7..13 -> ipIndex = 1
+                buttonIndex in 14..20 -> ipIndex = 2
             }
             sendColorChange(ipAddresses[ipIndex], colors[buttonIndex.toInt()])
             // Do something depending on the value of the tag
