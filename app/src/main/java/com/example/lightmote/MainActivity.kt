@@ -1,5 +1,6 @@
 package com.example.lightmote
 
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,34 +17,10 @@ import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
-    val colors: Array<ByteArray> = arrayOf(
-        byteArrayOf (127, 0, 0 ),
-        byteArrayOf (0, 127, 0 ),
-        byteArrayOf (0, 0, 127 ),
-        byteArrayOf (127, 127, 0 ),
-        byteArrayOf (127, 0, 127 ),
-        byteArrayOf (0, 127, 127 ),
-        byteArrayOf (127, 127, 127 ) ,
-        byteArrayOf (127, 0, 0 ),
-        byteArrayOf (0, 127, 0 ),
-        byteArrayOf (0, 0, 127 ),
-        byteArrayOf (127, 127, 0 ),
-        byteArrayOf (127, 0, 127 ),
-        byteArrayOf (0, 127, 127 ),
-        byteArrayOf (127, 127, 127 ) ,
-        byteArrayOf (127, 0, 0 ),
-        byteArrayOf (0, 127, 0 ),
-        byteArrayOf (0, 0, 127 ),
-        byteArrayOf (127, 127, 0 ),
-        byteArrayOf (127, 0, 127 ),
-        byteArrayOf (0, 127, 127 ),
-        byteArrayOf (127, 127, 127 )
-    )
-
     var ipAddresses = arrayOf(
-        "192.168.43.85",
-        "192.168.43.35",
-        "192.168.43.45"
+            "192.168.43.85",
+            "192.168.43.35",
+            "192.168.43.45"
     )
 
     fun sendColorChange(ip: String, color: ByteArray, buttonIndex: Int){
@@ -62,93 +39,36 @@ class MainActivity : AppCompatActivity() {
         buf.put(11, color[2])
         val address: InetAddress = InetAddress.getByName(ip)
         val packet = DatagramPacket(
-            buffer, buffer.size, address, 41412
+                buffer, buffer.size, address, 41412
         )
         val datagramSocket = DatagramSocket()
         thread{datagramSocket.send(packet)}
-
-
     }
 
-
-
-
-    private val myListener: View.OnClickListener = object : View.OnClickListener {
-        override fun onClick(v: View) {
-            Log.d("onClick", "onClick");
-            val tag: Any = v.getTag()
-            val buttonIndex = tag as Int
-            var ipIndex: Int = 0
-//            when {
-//                buttonIndex < 7 -> ipIndex = 0
-//                buttonIndex in 7..13 -> ipIndex = 1
-//                buttonIndex in 14..20 -> ipIndex = 2
-//            }
-            sendColorChange(ipAddresses[buttonIndex], colors[buttonIndex], buttonIndex)
-        }
+    fun getRgbFromHex(hex: String): ByteArray {
+        var noalpha = hex.drop(2)
+        var fullhex = "#$noalpha"
+        val initColor = Color.parseColor(fullhex)
+        val r = Color.red(initColor)/2
+        val g = Color.green(initColor)/2
+        val b = Color.blue(initColor)/2
+        return byteArrayOf(r.toByte(), g.toByte(), b.toByte() )
     }
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d("onCreate", "onCreate");
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val colorwheels = arrayOf(
-            findViewById(R.id.color_picker_view),
-            findViewById(R.id.color_picker_view2),
-            findViewById<ColorPickerView>(R.id.color_picker_view3)
+                findViewById(R.id.color_picker_view),
+                findViewById(R.id.color_picker_view2),
+                findViewById<ColorPickerView>(R.id.color_picker_view3)
         )
-
-        //todo
-        //hook up this colorchangelistener to ever wheel
-        //make them change ball colors
-
-        colorwheels[0].addOnColorChangedListener(OnColorChangedListener { selectedColor -> // Handle on color change
-            Log.d(
-                "ColorPicker",
-                "onColorChanged: 0x" + Integer.toHexString(selectedColor)
-            )
-        })
-
         for (i in 0..2) {
-            colorwheels[i].setOnClickListener(myListener)
-            colorwheels[i].tag = i
-//            colorwheels[i].setBackgroundColor(Color.rgb(colors[i][0].toInt(),colors[i][1].toInt(),colors[i][2].toInt()))
-
+            colorwheels[i].addOnColorChangedListener(OnColorChangedListener { selectedColor ->
+                sendColorChange(ipAddresses[i], getRgbFromHex(Integer.toHexString(selectedColor)), i)
+            })
         }
-//        val buttons = arrayOf(
-//            findViewById(R.id.btnA1),
-//            findViewById(R.id.btnA2),
-//            findViewById(R.id.btnA3),
-//            findViewById(R.id.btnA4),
-//            findViewById(R.id.btnA5),
-//            findViewById(R.id.btnA6),
-//            findViewById(R.id.btnA7),
-//            findViewById(R.id.btnB1),
-//            findViewById(R.id.btnB2),
-//            findViewById(R.id.btnB3),
-//            findViewById(R.id.btnB4),
-//            findViewById(R.id.btnB5),
-//            findViewById(R.id.btnB6),
-//            findViewById(R.id.btnB7),
-//            findViewById(R.id.btnC1),
-//            findViewById(R.id.btnC2),
-//            findViewById(R.id.btnC3),
-//            findViewById(R.id.btnC4),
-//            findViewById(R.id.btnC5),
-//            findViewById(R.id.btnC6),
-//            findViewById<Button>(R.id.btnC7)
-//        )
-//
-//        for (i in 0..20) {
-//            buttons[i].setOnClickListener(myListener)
-//            buttons[i].tag = i
-//            buttons[i].setBackgroundColor(Color.rgb(colors[i][0].toInt(),colors[i][1].toInt(),colors[i][2].toInt()))
-//            buttons[i].visibility = View.INVISIBLE
-//        }
-
-
     }
 }
 
