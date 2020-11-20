@@ -184,6 +184,7 @@ class MainActivity : AppCompatActivity() {
         for (i in 0..20) {
             buttons[i].setOnClickListener(myListener)
             buttons[i].tag = i
+            buttons[i].setBackgroundColor(Color.rgb(colors[i][0].toInt(),colors[i][1].toInt(),colors[i][2].toInt()))
         }
 
         for (i in 0..20) {
@@ -294,3 +295,6 @@ class MainActivity : AppCompatActivity() {
 //        -a way to tell it the number of buttons/keys you want it to cycle through, the first 3 butttons, (q,w,e) for example.
 //            also a way to tell it how fast to cycle through
 //        button have letters on them so they match up with keyboard(this could be an option)
+//
+//          a way to fade
+//          a way to strobe
