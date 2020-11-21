@@ -1,15 +1,16 @@
 package com.example.lightmote
 
+
+import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.flask.colorpicker.ColorPickerView
-import com.flask.colorpicker.OnColorChangedListener
+import com.flask.colorpicker.builder.ColorPickerClickListener
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -27,31 +28,28 @@ class MainActivity : AppCompatActivity() {
     )
 
     val colors: Array<ByteArray> = arrayOf(
-            byteArrayOf (127, 0, 0 ),
-            byteArrayOf (0, 127, 0 ),
-            byteArrayOf (0, 0, 127 ),
-            byteArrayOf (127, 127, 0 ),
-            byteArrayOf (127, 0, 127 ),
-            byteArrayOf (0, 127, 127 ),
-            byteArrayOf (127, 127, 127 ) ,
-            byteArrayOf (127, 0, 0 ),
-            byteArrayOf (0, 127, 0 ),
-            byteArrayOf (0, 0, 127 ),
-            byteArrayOf (127, 127, 0 ),
-            byteArrayOf (127, 0, 127 ),
-            byteArrayOf (0, 127, 127 ),
-            byteArrayOf (127, 127, 127 ) ,
-            byteArrayOf (127, 0, 0 ),
-            byteArrayOf (0, 127, 0 ),
-            byteArrayOf (0, 0, 127 ),
-            byteArrayOf (127, 127, 0 ),
-            byteArrayOf (127, 0, 127 ),
-            byteArrayOf (0, 127, 127 ),
-            byteArrayOf (127, 127, 127 )
+            byteArrayOf(127, 0, 0),
+            byteArrayOf(0, 127, 0),
+            byteArrayOf(0, 0, 127),
+            byteArrayOf(127, 127, 0),
+            byteArrayOf(127, 0, 127),
+            byteArrayOf(0, 127, 127),
+            byteArrayOf(127, 127, 127),
+            byteArrayOf(127, 0, 0),
+            byteArrayOf(0, 127, 0),
+            byteArrayOf(0, 0, 127),
+            byteArrayOf(127, 127, 0),
+            byteArrayOf(127, 0, 127),
+            byteArrayOf(0, 127, 127),
+            byteArrayOf(127, 127, 127),
+            byteArrayOf(127, 0, 0),
+            byteArrayOf(0, 127, 0),
+            byteArrayOf(0, 0, 127),
+            byteArrayOf(127, 127, 0),
+            byteArrayOf(127, 0, 127),
+            byteArrayOf(0, 127, 127),
+            byteArrayOf(127, 127, 127)
     )
-
-
-
 
     fun sendColorChange(ip: String, color: ByteArray, buttonIndex: Int){
         val tvHello=findViewById(R.id.mytextView) as TextView;
@@ -114,12 +112,14 @@ class MainActivity : AppCompatActivity() {
             ColorPickerDialogBuilder
                     .with(this)
                     .setTitle("Choose color")
-
                     .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                     .density(12)
-                    .setOnColorSelectedListener { selectedColor -> Toast(this) }
-
-                    .setNegativeButton("cancel") { dialog, which -> }
+                    .setOnColorSelectedListener { selectedColor ->
+                        sendColorChange(ipAddresses[ipIndex], colors[buttonIndex], buttonIndex)
+//                        buttons[buttonIndex].setBackgroundColor(Color.rgb(colors[buttonIndex][0].toInt(), colors[buttonIndex][1].toInt(), colors[buttonIndex][2].toInt()))
+                        Log.i("selectedColor", selectedColor.toString())
+                    }
+                    .setNegativeButton("ok") { dialog, which -> }
                     .build()
                     .show()
         true
@@ -156,6 +156,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
         val buttons = arrayOf(
                 findViewById(R.id.btnA1),
                 findViewById(R.id.btnA2),
@@ -180,17 +181,20 @@ class MainActivity : AppCompatActivity() {
                 findViewById<Button>(R.id.btnC7)
         )
 
-
         for (i in 0..20) {
             buttons[i].setOnClickListener(myListener)
             buttons[i].tag = i
-            buttons[i].setBackgroundColor(Color.rgb(colors[i][0].toInt(),colors[i][1].toInt(),colors[i][2].toInt()))
+            buttons[i].setBackgroundColor(Color.rgb(colors[i][0].toInt(), colors[i][1].toInt(), colors[i][2].toInt()))
         }
 
         for (i in 0..20) {
             buttons[i].setOnLongClickListener(myLongClickListener)
             buttons[i].tag = i
         }
+
+        //set up a listener on the colors so we can change the button background when the color changes
+        //https://stackoverflow.com/questions/14457711/android-listening-for-variable-changes
+        //make the color of the color picker be set based on the color of the button long held
 
 //        val colorwheels = arrayOf(
 //                findViewById(R.id.color_picker_view),
@@ -246,6 +250,8 @@ class MainActivity : AppCompatActivity() {
 //        }
     }
 }
+
+
 
 //get old buttons back
 //make longhold got into another window that is color selection
