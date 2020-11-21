@@ -21,6 +21,8 @@ import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
+    var buttons = arrayOf<Button>()
+
     var ipAddresses = arrayOf(
             "192.168.43.85",
             "192.168.43.35",
@@ -93,10 +95,8 @@ class MainActivity : AppCompatActivity() {
             buttonIndex in 14..20 -> ipIndex = 2
         }
         sendColorChange(ipAddresses[ipIndex], colors[buttonIndex], buttonIndex)
-        // Do something depending on the value of the tag
+
     }
-
-
 
     private val myLongClickListener: View.OnLongClickListener = View.OnLongClickListener { v ->
 
@@ -115,49 +115,23 @@ class MainActivity : AppCompatActivity() {
                     .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                     .density(12)
                     .setOnColorSelectedListener { selectedColor ->
-                        sendColorChange(ipAddresses[ipIndex], colors[buttonIndex], buttonIndex)
-//                        buttons[buttonIndex].setBackgroundColor(Color.rgb(colors[buttonIndex][0].toInt(), colors[buttonIndex][1].toInt(), colors[buttonIndex][2].toInt()))
+//                        sendColorChange(ipAddresses[ipIndex], colors[buttonIndex], buttonIndex)
+                        colors[buttonIndex] = getRgbFromHex(Integer.toHexString(selectedColor))
+                        buttons[buttonIndex].setBackgroundColor(Color.rgb(colors[buttonIndex][0].toInt()*2, colors[buttonIndex][1].toInt()*2, colors[buttonIndex][2].toInt()*2))
                         Log.i("selectedColor", selectedColor.toString())
                     }
                     .setNegativeButton("ok") { dialog, which -> }
                     .build()
                     .show()
         true
-
-
-
     }
-//set each button as the color it is set as
-    //make clicking buttons 'select' them by giving them some sort of border
-    //resize/position buttons so they are horizontal and leave space
-    //clean up todos
-
-
-
-//    private val myLongListener: View.OnLongClickListener = object : View.OnLongClickListener {
-//        override fun onLongClick(v: View?) {
-//            val tag: Any = v.getTag()
-//            val buttonIndex = tag as Int
-//            var ipIndex: Int = 0
-//            when {
-//                buttonIndex < 7 -> ipIndex = 0
-//                buttonIndex in 7..13 -> ipIndex = 1
-//                buttonIndex in 14..20 -> ipIndex = 2
-//            }
-//            sendColorChange(ipAddresses[ipIndex], colors[buttonIndex], buttonIndex)
-//            // Do something depending on the value of the tag
-//        }
-//
-//
-//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d("onCreate", "onCreate");
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
-        val buttons = arrayOf(
+        buttons = arrayOf(
                 findViewById(R.id.btnA1),
                 findViewById(R.id.btnA2),
                 findViewById(R.id.btnA3),
@@ -184,123 +158,16 @@ class MainActivity : AppCompatActivity() {
         for (i in 0..20) {
             buttons[i].setOnClickListener(myListener)
             buttons[i].tag = i
-            buttons[i].setBackgroundColor(Color.rgb(colors[i][0].toInt(), colors[i][1].toInt(), colors[i][2].toInt()))
+            buttons[i].setBackgroundColor(Color.rgb(colors[i][0].toInt()*2, colors[i][1].toInt()*2, colors[i][2].toInt()*2))
         }
 
         for (i in 0..20) {
             buttons[i].setOnLongClickListener(myLongClickListener)
             buttons[i].tag = i
         }
-
-        //set up a listener on the colors so we can change the button background when the color changes
-        //https://stackoverflow.com/questions/14457711/android-listening-for-variable-changes
-        //make the color of the color picker be set based on the color of the button long held
-
-//        val colorwheels = arrayOf(
-//                findViewById(R.id.color_picker_view),
-//                findViewById(R.id.color_picker_view2),
-//                findViewById<ColorPickerView>(R.id.color_picker_view3)
-//        )
-//        for (i in 0..2) {
-//            colorwheels[i].addOnColorChangedListener(OnColorChangedListener { selectedColor ->
-//                sendColorChange(ipAddresses[i], getRgbFromHex(Integer.toHexString(selectedColor)), i)
-//                ColorPickerDialogBuilder
-//                        .with(this)
-//                        .setTitle("Choose color")
-//
-//                        .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
-//                        .density(12)
-//                        .setOnColorSelectedListener { selectedColor -> Toast(this) }
-//
-//                        .setNegativeButton("cancel") { dialog, which -> }
-//                        .build()
-//                        .show()
-//            })
-//        }
-
-
-        //bring buttons back, but less room form them so we can add extra modifier buttons for things like sound, strobe, load presets
-        //make longhold on color buttons open color picker dialog
-
-
-
-//        val recorder = MediaRecorder()
-//
-//        Log.d("amp2", "amp2");
-//
-//        while (true){
-////            val msg: Message = mHandler.obtainMessage()
-//            val b = Bundle()
-//            try {
-//                sleep(250)
-//            } catch (e: InterruptedException) {
-//                // TODO Auto-generated catch block
-//                e.printStackTrace()
-//            }
-//            if (recorder != null) {
-//                val amplitude = recorder.maxAmplitude
-//                b.putLong("currentTime", amplitude.toLong())
-//                Log.i("AMPLITUDE", amplitude.toString())
-//            } else {
-//                b.putLong("currentTime", 0)
-//            }
-////            msg.data = b
-////            mHandler.sendMessage(msg)
-//
-//        }
     }
 }
 
 
 
-//get old buttons back
-//make longhold got into another window that is color selection
 
-//// TODO: 11/17/20 make a grid of buttons
-//        make the grid of buttons
-//          make color widget control ball colors
-//          make 3 color widgets
-//
-//        make long hold on buttons go into color select mode
-//        make normal click change the color of the ball on that row
-//        make a settings buton to input the IP of the balls for each row
-//            or make a button on each row that opens an input for putting in the IP
-//        a way to power off the balls
-//        a way to save button colors
-//          a way to return to default colors
-//
-//        determine if it is better to use their built in sequence system or make my own
-//        a way to record sequences
-//        a way to play an mp3 that starts at the same time as recorded sequences
-//        a way to load/save sequences
-
-//WISHES
-//        color change based on juggler location
-//        color change based on ball speed
-//        color change based on music
-//            even if this is super simple and just changes to the next color in a cycle everytime it hears a ball slap against my hand
-//
-//        lots of different color option
-//            1)color wheel
-//        ability to change colors automatically on loop through X colors
-//
-//        ability to make keyboard hotkeys for colors
-//        ability to make onscreen buttons for colors
-//            1)while in edit mode, pushing a key or a button makes that key/button become the currently selected color
-//
-//        a way to record sequences
-//        a way to play an mp3 that starts at the same time as recorded sequences
-//        a way to load/save sequences
-//
-//        a way to power off the balls
-//        a way to turn off balls lights, but leave it on
-//        a way to return to default colors
-//
-//        Possible button/key setup
-//        -an X that shown up in edit mode that allows you to set a button or key as off
-//        -a way to tell it the number of buttons/keys you want it to cycle through, the first 3 butttons, (q,w,e) for example.
-//            also a way to tell it how fast to cycle through
-//        button have letters on them so they match up with keyboard(this could be an option)
-//
-//          a way to fade
-//          a way to strobe
