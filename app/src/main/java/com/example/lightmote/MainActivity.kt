@@ -115,7 +115,6 @@ class MainActivity : AppCompatActivity() {
                     .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                     .density(12)
                     .setOnColorSelectedListener { selectedColor ->
-//                        sendColorChange(ipAddresses[ipIndex], colors[buttonIndex], buttonIndex)
                         colors[buttonIndex] = getRgbFromHex(Integer.toHexString(selectedColor))
                         buttons[buttonIndex].setBackgroundColor(Color.rgb(colors[buttonIndex][0].toInt()*2, colors[buttonIndex][1].toInt()*2, colors[buttonIndex][2].toInt()*2))
                         Log.i("selectedColor", selectedColor.toString())
