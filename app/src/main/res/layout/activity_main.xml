@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="#000000"
     android:translationX="0dp"
+    android:keepScreenOn="true"
     tools:context=".MainActivity">
 
         <Button
@@ -15,8 +16,8 @@
             android:layout_marginStart="220dp"
             android:layout_marginLeft="220dp"
             android:layout_marginTop="15dp"
-            android:text="O"
-            android:textSize="40dp" />
+            android:text="@string/o"
+            android:textSize="40sp" />
 
         <Button
             android:id="@+id/btnA2"
@@ -25,8 +26,8 @@
             android:layout_marginStart="310dp"
             android:layout_marginLeft="310dp"
             android:layout_marginTop="15dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -37,8 +38,8 @@
             android:layout_marginStart="400dp"
             android:layout_marginLeft="400dp"
             android:layout_marginTop="15dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -49,8 +50,8 @@
             android:layout_marginStart="490dp"
             android:layout_marginLeft="490dp"
             android:layout_marginTop="15dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -61,8 +62,8 @@
             android:layout_marginStart="580dp"
             android:layout_marginLeft="580dp"
             android:layout_marginTop="15dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -73,8 +74,8 @@
             android:layout_marginStart="670dp"
             android:layout_marginLeft="670dp"
             android:layout_marginTop="15dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -85,8 +86,8 @@
             android:layout_marginStart="760dp"
             android:layout_marginLeft="760dp"
             android:layout_marginTop="15dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -97,8 +98,8 @@
             android:layout_marginStart="220dp"
             android:layout_marginLeft="220dp"
             android:layout_marginTop="105dp"
-            android:text="O"
-            android:textSize="40dp" />
+            android:text="@string/o"
+            android:textSize="40sp" />
 
         <Button
             android:id="@+id/btnB2"
@@ -107,8 +108,8 @@
             android:layout_marginStart="310dp"
             android:layout_marginLeft="310dp"
             android:layout_marginTop="105dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -119,8 +120,8 @@
             android:layout_marginStart="400dp"
             android:layout_marginLeft="400dp"
             android:layout_marginTop="105dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -131,8 +132,8 @@
             android:layout_marginStart="490dp"
             android:layout_marginLeft="490dp"
             android:layout_marginTop="105dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -143,8 +144,8 @@
             android:layout_marginStart="580dp"
             android:layout_marginLeft="580dp"
             android:layout_marginTop="105dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -155,8 +156,8 @@
             android:layout_marginStart="670dp"
             android:layout_marginLeft="670dp"
             android:layout_marginTop="105dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -167,8 +168,8 @@
             android:layout_marginStart="760dp"
             android:layout_marginLeft="760dp"
             android:layout_marginTop="105dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -179,8 +180,8 @@
             android:layout_marginStart="220dp"
             android:layout_marginLeft="220dp"
             android:layout_marginTop="195dp"
-            android:text="O"
-            android:textSize="40dp" />
+            android:text="@string/o"
+            android:textSize="40sp" />
 
         <Button
             android:id="@+id/btnC2"
@@ -189,8 +190,8 @@
             android:layout_marginStart="310dp"
             android:layout_marginLeft="310dp"
             android:layout_marginTop="195dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -201,8 +202,8 @@
             android:layout_marginStart="400dp"
             android:layout_marginLeft="400dp"
             android:layout_marginTop="195dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -213,8 +214,8 @@
             android:layout_marginStart="490dp"
             android:layout_marginLeft="490dp"
             android:layout_marginTop="195dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -225,8 +226,8 @@
             android:layout_marginStart="580dp"
             android:layout_marginLeft="580dp"
             android:layout_marginTop="195dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -237,8 +238,8 @@
             android:layout_marginStart="670dp"
             android:layout_marginLeft="670dp"
             android:layout_marginTop="195dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -249,8 +250,8 @@
             android:layout_marginStart="760dp"
             android:layout_marginLeft="760dp"
             android:layout_marginTop="195dp"
-            android:text="O"
-            android:textSize="40dp"
+            android:text="@string/o"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     <TextView

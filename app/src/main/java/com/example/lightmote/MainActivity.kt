@@ -23,8 +23,9 @@ class SoundMeter {
     private var ar: AudioRecord? = null
     private var minSize = 0
     fun start() {
-        minSize = AudioRecord.getMinBufferSize(8000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
-        ar = AudioRecord(MediaRecorder.AudioSource.MIC, 8000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, minSize)
+        minSize = AudioRecord.getMinBufferSize(4000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
+        Log.d("minSize", minSize.toString());
+        ar = AudioRecord(MediaRecorder.AudioSource.MIC, 4000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, minSize)
         ar!!.startRecording()
     }
 
@@ -245,20 +246,23 @@ class MainActivity : AppCompatActivity() {
             while (true) {
                 if (useMic[0] == true || useMic[1] == true || useMic[2] == true) {
                     try {
-                        Thread.sleep(200)
+                        Thread.sleep(50)
                     } catch (e: InterruptedException) {
                         e.printStackTrace()
                     }
                     if (mySoundMeter != null) {
                         val amplitude = mySoundMeter.amplitude
                         Log.i("AMPLITUDE", amplitude.toString())
-                        if (amplitude > 800 && indicesCanIncreaseFromMic){//&& System.currentTimeMillis() - timeSinceLastMicIndexChange > 100) {
-                            timeSinceLastMicIndexChange = System.currentTimeMillis()
+                        if (amplitude > 800){//&& System.currentTimeMillis() - timeSinceLastMicIndexChange > 100) {
+                            if (indicesCanIncreaseFromMic) {
+                                timeSinceLastMicIndexChange = System.currentTimeMillis()
                                 indicesCanIncreaseFromMic = false
-                            for (i in 0..2) {
-                                if (useMic[i]) {
+                                Log.i("INCREASE", "increase")
+                                for (i in 0..2) {
+                                    if (useMic[i]) {
 
-                                    increaseSelectedIndexByOne(i)
+                                        increaseSelectedIndexByOne(i)
+                                    }
                                 }
                             }
                         }else{
