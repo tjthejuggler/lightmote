@@ -1,8 +1,10 @@
 package com.example.lightmote
 
 
-import android.content.DialogInterface
 import android.graphics.Color
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -10,7 +12,6 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.flask.colorpicker.ColorPickerView
-import com.flask.colorpicker.builder.ColorPickerClickListener
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -18,6 +19,34 @@ import java.net.InetAddress
 import java.nio.ByteBuffer
 import kotlin.concurrent.thread
 
+class SoundMeter {
+    private var ar: AudioRecord? = null
+    private var minSize = 0
+    fun start() {
+        minSize = AudioRecord.getMinBufferSize(8000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
+        ar = AudioRecord(MediaRecorder.AudioSource.MIC, 8000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, minSize)
+        ar!!.startRecording()
+    }
+
+    fun stop() {
+        if (ar != null) {
+            ar!!.stop()
+        }
+    }
+
+    val amplitude: Double
+        get() {
+            val buffer = ShortArray(minSize)
+            ar!!.read(buffer, 0, minSize)
+            var max = 0
+            for (s in buffer) {
+                if (Math.abs(s.toInt()) > max) {
+                    max = Math.abs(s.toInt())
+                }
+            }
+            return max.toDouble()
+        }
+}
 
 class MainActivity : AppCompatActivity() {
 
@@ -53,6 +82,10 @@ class MainActivity : AppCompatActivity() {
             byteArrayOf(127, 127, 127)
     )
 
+    var selectedIndex = arrayOf(0, 7, 14)
+
+    var useMic = arrayOf(true, true, true)
+
     fun sendColorChange(ip: String, color: ByteArray, buttonIndex: Int){
         val tvHello=findViewById(R.id.mytextView) as TextView;
         tvHello.text= buttonIndex.toString()
@@ -85,21 +118,51 @@ class MainActivity : AppCompatActivity() {
         return byteArrayOf(r.toByte(), g.toByte(), b.toByte())
     }
 
-    private val myListener: View.OnClickListener = View.OnClickListener { v ->
-        val tag: Any = v.getTag()
-        val buttonIndex = tag as Int
-        var ipIndex: Int = 0
+    fun setSelectedIndex(buttonIndex: Int){
+        when {
+            buttonIndex < 7 -> selectedIndex[0] = buttonIndex
+            buttonIndex in 7..13 -> selectedIndex[1] = buttonIndex
+            buttonIndex in 14..20 -> selectedIndex[2] = buttonIndex
+        }
+        var ipIndex = 0
+        showSelectedIndex()
         when {
             buttonIndex < 7 -> ipIndex = 0
             buttonIndex in 7..13 -> ipIndex = 1
             buttonIndex in 14..20 -> ipIndex = 2
         }
         sendColorChange(ipAddresses[ipIndex], colors[buttonIndex], buttonIndex)
+    }
 
+    fun showSelectedIndex(){
+        for (i in 0..20) {
+            if (selectedIndex[0] == i || selectedIndex[1] == i || selectedIndex[2] == i) {
+                buttons[i].setText("O")
+            }else{
+                buttons[i].setText(" ")
+            }
+        }
+    }
+
+    private val myListener: View.OnClickListener = View.OnClickListener { v ->
+        val tag: Any = v.getTag()
+        val buttonIndex = tag as Int
+        setSelectedIndex(buttonIndex)
+    }
+
+    fun setButtonColor(buttonIndex: Int) {
+        var redValue = colors[buttonIndex][0].toInt()*2
+        var greenValue = colors[buttonIndex][1].toInt()*2
+        var blueValue = colors[buttonIndex][2].toInt()*2
+        buttons[buttonIndex].setBackgroundColor(Color.rgb(redValue, greenValue, blueValue))
+        if (redValue+greenValue+blueValue > 600) {
+            buttons[buttonIndex].setTextColor(Color.BLACK)
+        }else{
+            buttons[buttonIndex].setTextColor(Color.WHITE)
+        }
     }
 
     private val myLongClickListener: View.OnLongClickListener = View.OnLongClickListener { v ->
-
         val tag: Any = v.getTag()
         val buttonIndex = tag as Int
         var ipIndex: Int = 0
@@ -116,13 +179,23 @@ class MainActivity : AppCompatActivity() {
                     .density(12)
                     .setOnColorSelectedListener { selectedColor ->
                         colors[buttonIndex] = getRgbFromHex(Integer.toHexString(selectedColor))
-                        buttons[buttonIndex].setBackgroundColor(Color.rgb(colors[buttonIndex][0].toInt()*2, colors[buttonIndex][1].toInt()*2, colors[buttonIndex][2].toInt()*2))
+                        setButtonColor(buttonIndex)
                         Log.i("selectedColor", selectedColor.toString())
                     }
                     .setNegativeButton("ok") { dialog, which -> }
                     .build()
                     .show()
         true
+    }
+
+    private fun increaseSelectedIndexByOne(i: Int) {
+        runOnUiThread {
+            selectedIndex[i] = selectedIndex[i] + 1
+            if (selectedIndex[i] - i * 7 > 6) {
+                selectedIndex[i] = selectedIndex[i] - 7
+            }
+            setSelectedIndex(selectedIndex[i])
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -153,16 +226,47 @@ class MainActivity : AppCompatActivity() {
                 findViewById(R.id.btnC6),
                 findViewById<Button>(R.id.btnC7)
         )
-
         for (i in 0..20) {
             buttons[i].setOnClickListener(myListener)
-            buttons[i].tag = i
-            buttons[i].setBackgroundColor(Color.rgb(colors[i][0].toInt()*2, colors[i][1].toInt()*2, colors[i][2].toInt()*2))
-        }
-
-        for (i in 0..20) {
             buttons[i].setOnLongClickListener(myLongClickListener)
             buttons[i].tag = i
+            setButtonColor(i)
+        }
+//        for (i in 0..20) {
+//            buttons[i].setOnLongClickListener(myLongClickListener)
+//            buttons[i].tag = i
+//        }
+        showSelectedIndex()
+        val mySoundMeter = SoundMeter()
+        mySoundMeter.start()
+        var timeSinceLastMicIndexChange = System.currentTimeMillis()
+        var indicesCanIncreaseFromMic = true
+        thread {
+            while (true) {
+                if (useMic[0] == true || useMic[1] == true || useMic[2] == true) {
+                    try {
+                        Thread.sleep(200)
+                    } catch (e: InterruptedException) {
+                        e.printStackTrace()
+                    }
+                    if (mySoundMeter != null) {
+                        val amplitude = mySoundMeter.amplitude
+                        Log.i("AMPLITUDE", amplitude.toString())
+                        if (amplitude > 800 && indicesCanIncreaseFromMic){//&& System.currentTimeMillis() - timeSinceLastMicIndexChange > 100) {
+                            timeSinceLastMicIndexChange = System.currentTimeMillis()
+                                indicesCanIncreaseFromMic = false
+                            for (i in 0..2) {
+                                if (useMic[i]) {
+
+                                    increaseSelectedIndexByOne(i)
+                                }
+                            }
+                        }else{
+                            indicesCanIncreaseFromMic = true
+                        }
+                    }
+                }
+            }
         }
     }
 }
