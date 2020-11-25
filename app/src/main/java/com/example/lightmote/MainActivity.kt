@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -203,6 +204,8 @@ class MainActivity : AppCompatActivity() {
         Log.d("onCreate", "onCreate");
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Log.d("Build.PRODUCT", Build.PRODUCT);
+
 
         buttons = arrayOf(
                 findViewById(R.id.btnA1),
@@ -238,35 +241,38 @@ class MainActivity : AppCompatActivity() {
 //            buttons[i].tag = i
 //        }
         showSelectedIndex()
+        if (Build.PRODUCT != "sdk_gphone_x86_arm") {
         val mySoundMeter = SoundMeter()
         mySoundMeter.start()
         var timeSinceLastMicIndexChange = System.currentTimeMillis()
         var indicesCanIncreaseFromMic = true
-        thread {
-            while (true) {
-                if (useMic[0] == true || useMic[1] == true || useMic[2] == true) {
-                    try {
-                        Thread.sleep(50)
-                    } catch (e: InterruptedException) {
-                        e.printStackTrace()
-                    }
-                    if (mySoundMeter != null) {
-                        val amplitude = mySoundMeter.amplitude
-                        Log.i("AMPLITUDE", amplitude.toString())
-                        if (amplitude > 800){//&& System.currentTimeMillis() - timeSinceLastMicIndexChange > 100) {
-                            if (indicesCanIncreaseFromMic) {
-                                timeSinceLastMicIndexChange = System.currentTimeMillis()
-                                indicesCanIncreaseFromMic = false
-                                Log.i("INCREASE", "increase")
-                                for (i in 0..2) {
-                                    if (useMic[i]) {
 
-                                        increaseSelectedIndexByOne(i)
+            thread {
+                while (true) {
+                    if (useMic[0] || useMic[1] || useMic[2]) {
+                        try {
+                            Thread.sleep(50)
+                        } catch (e: InterruptedException) {
+                            e.printStackTrace()
+                        }
+                        if (mySoundMeter != null) {
+                            val amplitude = mySoundMeter.amplitude
+                            Log.i("AMPLITUDE", amplitude.toString())
+                            if (amplitude > 800) {//&& System.currentTimeMillis() - timeSinceLastMicIndexChange > 100) {
+                                if (indicesCanIncreaseFromMic) {
+                                    timeSinceLastMicIndexChange = System.currentTimeMillis()
+                                    indicesCanIncreaseFromMic = false
+                                    Log.i("INCREASE", "increase")
+                                    for (i in 0..2) {
+                                        if (useMic[i]) {
+
+                                            increaseSelectedIndexByOne(i)
+                                        }
                                     }
                                 }
+                            } else {
+                                indicesCanIncreaseFromMic = true
                             }
-                        }else{
-                            indicesCanIncreaseFromMic = true
                         }
                     }
                 }
