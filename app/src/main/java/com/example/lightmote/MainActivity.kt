@@ -8,8 +8,10 @@ import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.flask.colorpicker.ColorPickerView
@@ -137,11 +139,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun showSelectedIndex(){
+        val selectedSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 90f, resources.displayMetrics)
+        val unselectedSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 80f, resources.displayMetrics)
         for (i in 0..20) {
             if (selectedIndex[0] == i || selectedIndex[1] == i || selectedIndex[2] == i) {
-                buttons[i].setText("O")
+                buttons[i].rotation = 45F
+                buttons[i].layoutParams.height=selectedSize.toInt();
+                buttons[i].layoutParams.width=selectedSize.toInt();
+                buttons[i].bringToFront();
+
             }else{
                 buttons[i].setText(" ")
+                buttons[i].rotation = 0F
+                buttons[i].layoutParams.height=unselectedSize.toInt();
+                buttons[i].layoutParams.width=unselectedSize.toInt();
             }
         }
     }
@@ -236,47 +247,40 @@ class MainActivity : AppCompatActivity() {
             buttons[i].tag = i
             setButtonColor(i)
         }
-//        for (i in 0..20) {
-//            buttons[i].setOnLongClickListener(myLongClickListener)
-//            buttons[i].tag = i
-//        }
         showSelectedIndex()
         if (Build.PRODUCT != "sdk_gphone_x86_arm") {
-        val mySoundMeter = SoundMeter()
-        mySoundMeter.start()
-        var timeSinceLastMicIndexChange = System.currentTimeMillis()
-        var indicesCanIncreaseFromMic = true
+            val mySoundMeter = SoundMeter()
+            mySoundMeter.start()
+            var indicesCanIncreaseFromMic = true
+                thread {
+                    while (true) {
+                        if (useMic[0] || useMic[1] || useMic[2]) {
+                            try {
+                                Thread.sleep(50)
+                            } catch (e: InterruptedException) {
+                                e.printStackTrace()
+                            }
+                            if (mySoundMeter != null) {
+                                val amplitude = mySoundMeter.amplitude
+                                Log.i("AMPLITUDE", amplitude.toString())
+                                if (amplitude > 800) {
+                                    if (indicesCanIncreaseFromMic) {
+                                        indicesCanIncreaseFromMic = false
+                                        Log.i("INCREASE", "increase")
+                                        for (i in 0..2) {
+                                            if (useMic[i]) {
 
-            thread {
-                while (true) {
-                    if (useMic[0] || useMic[1] || useMic[2]) {
-                        try {
-                            Thread.sleep(50)
-                        } catch (e: InterruptedException) {
-                            e.printStackTrace()
-                        }
-                        if (mySoundMeter != null) {
-                            val amplitude = mySoundMeter.amplitude
-                            Log.i("AMPLITUDE", amplitude.toString())
-                            if (amplitude > 800) {//&& System.currentTimeMillis() - timeSinceLastMicIndexChange > 100) {
-                                if (indicesCanIncreaseFromMic) {
-                                    timeSinceLastMicIndexChange = System.currentTimeMillis()
-                                    indicesCanIncreaseFromMic = false
-                                    Log.i("INCREASE", "increase")
-                                    for (i in 0..2) {
-                                        if (useMic[i]) {
-
-                                            increaseSelectedIndexByOne(i)
+                                                increaseSelectedIndexByOne(i)
+                                            }
                                         }
                                     }
+                                } else {
+                                    indicesCanIncreaseFromMic = true
                                 }
-                            } else {
-                                indicesCanIncreaseFromMic = true
                             }
                         }
                     }
                 }
-            }
         }
     }
 }
