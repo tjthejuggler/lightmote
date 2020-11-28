@@ -4,15 +4,14 @@ package com.example.lightmote
 import android.graphics.Color
 import android.media.AudioFormat
 import android.media.AudioRecord
+import android.media.Image
 import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import android.view.View
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.flask.colorpicker.ColorPickerView
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder
@@ -54,7 +53,9 @@ class SoundMeter {
 
 class MainActivity : AppCompatActivity() {
 
-    var buttons = arrayOf<Button>()
+    var colorButtons = arrayOf<Button>()
+    var micButtons = arrayOf<ImageButton>()
+    var micButtonXs = arrayOf<ImageView>()
 
     var ipAddresses = arrayOf(
             "192.168.43.85",
@@ -88,7 +89,7 @@ class MainActivity : AppCompatActivity() {
 
     var selectedIndex = arrayOf(0, 7, 14)
 
-    var useMic = arrayOf(true, true, true)
+    var micOn = arrayOf(true, true, true)
 
     fun sendColorChange(ip: String, color: ByteArray, buttonIndex: Int){
         val tvHello=findViewById(R.id.mytextView) as TextView;
@@ -143,39 +144,50 @@ class MainActivity : AppCompatActivity() {
         val unselectedSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 80f, resources.displayMetrics)
         for (i in 0..20) {
             if (selectedIndex[0] == i || selectedIndex[1] == i || selectedIndex[2] == i) {
-                buttons[i].rotation = 45F
-                buttons[i].layoutParams.height=selectedSize.toInt();
-                buttons[i].layoutParams.width=selectedSize.toInt();
-                buttons[i].bringToFront();
+                colorButtons[i].rotation = 45F
+                colorButtons[i].layoutParams.height=selectedSize.toInt();
+                colorButtons[i].layoutParams.width=selectedSize.toInt();
+                colorButtons[i].bringToFront();
 
             }else{
-                buttons[i].setText(" ")
-                buttons[i].rotation = 0F
-                buttons[i].layoutParams.height=unselectedSize.toInt();
-                buttons[i].layoutParams.width=unselectedSize.toInt();
+                colorButtons[i].setText(" ")
+                colorButtons[i].rotation = 0F
+                colorButtons[i].layoutParams.height=unselectedSize.toInt();
+                colorButtons[i].layoutParams.width=unselectedSize.toInt();
             }
         }
     }
 
-    private val myListener: View.OnClickListener = View.OnClickListener { v ->
+    private val colorButtonListener: View.OnClickListener = View.OnClickListener { v ->
         val tag: Any = v.getTag()
         val buttonIndex = tag as Int
         setSelectedIndex(buttonIndex)
+    }
+
+    private val micButtonListener: View.OnClickListener = View.OnClickListener { v ->
+        val tag: Any = v.getTag()
+        val buttonIndex = tag as Int
+        micOn[buttonIndex] = !micOn[buttonIndex]
+        if (micOn[buttonIndex]) {
+            micButtonXs[buttonIndex].visibility = View.GONE
+        }else{
+            micButtonXs[buttonIndex].visibility = View.VISIBLE
+        }
     }
 
     fun setButtonColor(buttonIndex: Int) {
         var redValue = colors[buttonIndex][0].toInt()*2
         var greenValue = colors[buttonIndex][1].toInt()*2
         var blueValue = colors[buttonIndex][2].toInt()*2
-        buttons[buttonIndex].setBackgroundColor(Color.rgb(redValue, greenValue, blueValue))
+        colorButtons[buttonIndex].setBackgroundColor(Color.rgb(redValue, greenValue, blueValue))
         if (redValue+greenValue+blueValue > 600) {
-            buttons[buttonIndex].setTextColor(Color.BLACK)
+            colorButtons[buttonIndex].setTextColor(Color.BLACK)
         }else{
-            buttons[buttonIndex].setTextColor(Color.WHITE)
+            colorButtons[buttonIndex].setTextColor(Color.WHITE)
         }
     }
 
-    private val myLongClickListener: View.OnLongClickListener = View.OnLongClickListener { v ->
+    private val colorButtonLongClickListener: View.OnLongClickListener = View.OnLongClickListener { v ->
         val tag: Any = v.getTag()
         val buttonIndex = tag as Int
         var ipIndex: Int = 0
@@ -218,7 +230,7 @@ class MainActivity : AppCompatActivity() {
         Log.d("Build.PRODUCT", Build.PRODUCT);
 
 
-        buttons = arrayOf(
+        colorButtons = arrayOf(
                 findViewById(R.id.btnA1),
                 findViewById(R.id.btnA2),
                 findViewById(R.id.btnA3),
@@ -241,10 +253,24 @@ class MainActivity : AppCompatActivity() {
                 findViewById(R.id.btnC6),
                 findViewById<Button>(R.id.btnC7)
         )
+        micButtons = arrayOf(
+            findViewById(R.id.micBtnA),
+            findViewById(R.id.micBtnB),
+            findViewById<ImageButton>(R.id.micBtnC)
+        )
+        for (i in 0..2) {
+            micButtons[i].tag = i
+            micButtons[i].setOnClickListener(micButtonListener)
+        }
+        micButtonXs = arrayOf(
+            findViewById(R.id.micBtnAX),
+            findViewById(R.id.micBtnBX),
+            findViewById<ImageView>(R.id.micBtnCX)
+        )
         for (i in 0..20) {
-            buttons[i].setOnClickListener(myListener)
-            buttons[i].setOnLongClickListener(myLongClickListener)
-            buttons[i].tag = i
+            colorButtons[i].setOnClickListener(colorButtonListener)
+            colorButtons[i].setOnLongClickListener(colorButtonLongClickListener)
+            colorButtons[i].tag = i
             setButtonColor(i)
         }
         showSelectedIndex()
@@ -254,7 +280,7 @@ class MainActivity : AppCompatActivity() {
             var indicesCanIncreaseFromMic = true
                 thread {
                     while (true) {
-                        if (useMic[0] || useMic[1] || useMic[2]) {
+                        if (micOn[0] || micOn[1] || micOn[2]) {
                             try {
                                 Thread.sleep(50)
                             } catch (e: InterruptedException) {
@@ -268,7 +294,7 @@ class MainActivity : AppCompatActivity() {
                                         indicesCanIncreaseFromMic = false
                                         Log.i("INCREASE", "increase")
                                         for (i in 0..2) {
-                                            if (useMic[i]) {
+                                            if (micOn[i]) {
 
                                                 increaseSelectedIndexByOne(i)
                                             }

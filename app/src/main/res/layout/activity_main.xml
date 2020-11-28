@@ -246,5 +246,59 @@
             android:text="0" />
 
 
+        <ImageButton
+            android:id="@+id/micBtnA"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginStart="120dp"
+            android:layout_marginLeft="120dp"
+            android:layout_marginTop="15dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/microphone" />
+        <ImageView
+            android:id="@+id/micBtnAX"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginStart="120dp"
+            android:layout_marginLeft="120dp"
+            android:layout_marginTop="15dp"
+            android:visibility="gone"
+            android:src="@drawable/micx"/>
 
+        <ImageButton
+            android:id="@+id/micBtnB"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginStart="120dp"
+            android:layout_marginLeft="120dp"
+            android:layout_marginTop="105dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/microphone" />
+        <ImageView
+            android:id="@+id/micBtnBX"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginStart="120dp"
+            android:layout_marginLeft="120dp"
+            android:layout_marginTop="105dp"
+            android:visibility="gone"
+            android:src="@drawable/micx"/>
+        <ImageButton
+            android:id="@+id/micBtnC"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginStart="120dp"
+            android:layout_marginLeft="120dp"
+            android:layout_marginTop="195dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/microphone" />
+        <ImageView
+            android:id="@+id/micBtnCX"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginStart="120dp"
+            android:layout_marginLeft="120dp"
+            android:layout_marginTop="195dp"
+            android:visibility="gone"
+            android:src="@drawable/micx"/>
 </RelativeLayout>
