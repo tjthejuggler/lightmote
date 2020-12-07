@@ -1,6 +1,8 @@
 package com.example.lightmote
 
 
+import android.app.Dialog
+import android.content.Context
 import android.graphics.Color
 import android.media.AudioFormat
 import android.media.AudioRecord
@@ -164,6 +166,32 @@ class MainActivity : AppCompatActivity() {
         setSelectedIndex(buttonIndex)
     }
 
+    private val colorButtonLongClickListener: View.OnLongClickListener = View.OnLongClickListener { v ->
+        val tag: Any = v.getTag()
+        val buttonIndex = tag as Int
+        var ipIndex: Int = 0
+        when {
+            buttonIndex < 7 -> ipIndex = 0
+            buttonIndex in 7..13 -> ipIndex = 1
+            buttonIndex in 14..20 -> ipIndex = 2
+        }
+
+        ColorPickerDialogBuilder
+                .with(this)
+                .setTitle("Choose color")
+                .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
+                .density(12)
+                .setOnColorSelectedListener { selectedColor ->
+                    colors[buttonIndex] = getRgbFromHex(Integer.toHexString(selectedColor))
+                    setButtonColor(buttonIndex)
+                    Log.i("selectedColor", selectedColor.toString())
+                }
+                .setNegativeButton("ok") { dialog, which -> }
+                .build()
+                .show()
+        true
+    }
+
     private val micButtonListener: View.OnClickListener = View.OnClickListener { v ->
         val tag: Any = v.getTag()
         val buttonIndex = tag as Int
@@ -173,6 +201,31 @@ class MainActivity : AppCompatActivity() {
         }else{
             micButtonXs[buttonIndex].visibility = View.VISIBLE
         }
+    }
+
+    class CustomDialogClass(context: Context) : Dialog(context) {
+
+        init {
+            setCancelable(true)
+        }
+        private val yesButtonListener: View.OnClickListener = View.OnClickListener { v ->
+
+            this.cancel()
+        }
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            setContentView(R.layout.mic_longhold_dialog_layout)
+            val yesButton=findViewById(R.id.btn_yes) as Button;
+            yesButton.setOnClickListener(yesButtonListener)
+        }
+    }
+
+    private val micButtonLongClickListener: View.OnLongClickListener = View.OnLongClickListener { v ->
+        val tag: Any = v.getTag()
+        val buttonIndex = tag as Int
+        CustomDialogClass(this).show()
+        Log.d("color_longhold", Build.PRODUCT);
+        true
     }
 
     fun setButtonColor(buttonIndex: Int) {
@@ -187,31 +240,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val colorButtonLongClickListener: View.OnLongClickListener = View.OnLongClickListener { v ->
-        val tag: Any = v.getTag()
-        val buttonIndex = tag as Int
-        var ipIndex: Int = 0
-        when {
-            buttonIndex < 7 -> ipIndex = 0
-            buttonIndex in 7..13 -> ipIndex = 1
-            buttonIndex in 14..20 -> ipIndex = 2
-        }
 
-            ColorPickerDialogBuilder
-                    .with(this)
-                    .setTitle("Choose color")
-                    .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
-                    .density(12)
-                    .setOnColorSelectedListener { selectedColor ->
-                        colors[buttonIndex] = getRgbFromHex(Integer.toHexString(selectedColor))
-                        setButtonColor(buttonIndex)
-                        Log.i("selectedColor", selectedColor.toString())
-                    }
-                    .setNegativeButton("ok") { dialog, which -> }
-                    .build()
-                    .show()
-        true
-    }
 
     private fun increaseSelectedIndexByOne(i: Int) {
         runOnUiThread {
@@ -261,6 +290,7 @@ class MainActivity : AppCompatActivity() {
         for (i in 0..2) {
             micButtons[i].tag = i
             micButtons[i].setOnClickListener(micButtonListener)
+            micButtons[i].setOnLongClickListener(micButtonLongClickListener)
         }
         micButtonXs = arrayOf(
             findViewById(R.id.micBtnAX),
