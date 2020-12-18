@@ -1,0 +1,31 @@
+
+color change based on juggler location
+color change based on ball speed
+color change based on music
+    there can be a simple and a complex one
+                    simple is just based on amplitude, complex is more like a music visualizer
+
+lots of different color option
+    1)color wheel
+ability to change colors automatically on loop through X colors
+
+ability to make keyboard hotkeys for colors
+ability to make onscreen buttons for colors
+    1)while in edit mode, pushing a key or a button makes that key/button become the currently selected color
+
+a way to record sequences
+a way to play an mp3 that starts at the same time as recorded sequences
+a way to load/save sequences
+
+a way to power off the balls
+a way to turn off balls lights, but leave it on
+a way to return to default colors
+
+Possible button/key setup
+-an X that shown up in edit mode that allows you to set a button or key as off
+-a way to tell it the number of buttons/keys you want it to cycle through, the first 3 butttons, (q,w,e) for example.
+    also a way to tell it how fast to cycle through
+button have letters on them so they match up with keyboard(this could be an option)
+
+  a way to fade
+  a way to strobe
