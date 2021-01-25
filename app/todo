@@ -1,4 +1,5 @@
-figure out how to make different notes be different colors
+figure out how to make different notes be different color
+
 what else would be good for audience participation?
 
 maybe shrink mic buttons
@@ -6,6 +7,13 @@ maybe shrink mic buttons
     longhold it to change the threshold (duration, loudness, space between)
         make a 'return to default' option
     eventually in longhold menu make a toggle between simple and complex audio control
+
+make a loop button like the mic button
+
+instead of just colors, make the squares represent loops
+    by default the loops are just of single colors, so they are as things are now
+    if only one loop is on for a ball, show its loop out on main screen?
+
 
 make a settings button to input the IP of the balls for each row
     or make a button on each row that opens an input for putting in the IP
@@ -19,7 +27,8 @@ a way to record sequences
 a way to play an mp3 that starts at the same time as recorded sequences
 a way to load/save sequences
 
-
+music visualizer tutorial:
+https://www.dreamincode.net/forums/topic/303235-visualizing-sound-from-the-microphone/
 
 
 

@@ -55,13 +55,14 @@ class SoundMeter {
 
 class MainActivity : AppCompatActivity() {
 
+    var settingsButtons = arrayOf<Button>()
     var colorButtons = arrayOf<Button>()
     var micButtons = arrayOf<ImageButton>()
     var micButtonXs = arrayOf<ImageView>()
 
     var ipAddresses = arrayOf(
             "192.168.43.85",
-            "192.168.43.35",
+            "192.168.43.23",
             "192.168.43.240"
     )
 
@@ -166,6 +167,14 @@ class MainActivity : AppCompatActivity() {
         setSelectedIndex(buttonIndex)
     }
 
+    private val settingsButtonListener: View.OnClickListener = View.OnClickListener { v ->
+        val tag: Any = v.getTag()
+        val buttonIndex = tag as Int
+
+
+
+    }
+
     private val colorButtonLongClickListener: View.OnLongClickListener = View.OnLongClickListener { v ->
         val tag: Any = v.getTag()
         val buttonIndex = tag as Int
@@ -258,6 +267,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         Log.d("Build.PRODUCT", Build.PRODUCT);
 
+        settingsButtons = arrayOf(
+                findViewById(R.id.settings_button1),
+                findViewById(R.id.settings_button2),
+                findViewById<Button>(R.id.settings_button3)
+        )
 
         colorButtons = arrayOf(
                 findViewById(R.id.btnA1),
@@ -301,6 +315,11 @@ class MainActivity : AppCompatActivity() {
             colorButtons[i].setOnClickListener(colorButtonListener)
             colorButtons[i].setOnLongClickListener(colorButtonLongClickListener)
             colorButtons[i].tag = i
+            setButtonColor(i)
+        }
+        for (i in 0..2) {
+            settingsButtons[i].setOnClickListener(settingsButtonListener)
+            settingsButtons[i].tag = i
             setButtonColor(i)
         }
         showSelectedIndex()
