@@ -332,4 +332,24 @@
             android:layout_marginTop="195dp"
             android:text="Button" />
 
+        <EditText
+            android:id="@+id/sequenceText"
+            android:layout_width="665dp"
+            android:layout_height="105dp"
+            android:layout_marginLeft="160dp"
+            android:layout_marginTop="290dp"
+            android:ems="10"
+            android:background="#ffffff"
+            android:gravity="start|top"
+            android:inputType="textMultiLine" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Button"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="295dp"
+            />
+
 </RelativeLayout>
