@@ -6,7 +6,8 @@ import android.content.Context
 import android.graphics.Color
 import android.media.AudioFormat
 import android.media.AudioRecord
-import android.media.Image
+import android.media.MediaPlayer
+import android.media.MediaPlayer.OnPreparedListener
 import android.media.MediaRecorder
 import android.os.Build
 import android.os.Bundle
@@ -22,6 +23,7 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.nio.ByteBuffer
 import kotlin.concurrent.thread
+
 
 class SoundMeter {
     private var ar: AudioRecord? = null
@@ -59,6 +61,11 @@ class MainActivity : AppCompatActivity() {
     var colorButtons = arrayOf<Button>()
     var micButtons = arrayOf<ImageButton>()
     var micButtonXs = arrayOf<ImageView>()
+
+
+
+
+
 
     var ipAddresses = arrayOf(
             "192.168.43.85",
@@ -211,6 +218,42 @@ class MainActivity : AppCompatActivity() {
             micButtonXs[buttonIndex].visibility = View.VISIBLE
         }
     }
+//when wwe click the seqBtn we want to make sure mic are off
+    //then we want to make a toast that says you need something in the text field if there is nothing
+    //then we want to start playing a song(maybe an mp3 location/file should be indicated in the first line of the textfield
+        //regina mp3 has been downloaded, put it in root and hardcode it in here to filename
+    //regina is there, but when we use this path it is not giving us the phone root it is giving the app root
+    fun playMP3(context: Context) {
+        var fileName = "fidelity"
+        val path: String = context.getFilesDir().toString() + "/" + fileName + ".mp3"
+        val player = MediaPlayer()
+
+        try {
+            Log.d("seqBtn path", path);
+            player.setDataSource(path)
+            player.prepare()
+            player.setOnPreparedListener(OnPreparedListener { mp -> mp.start() })
+            player.prepareAsync()
+
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        } catch (e: Exception) {
+            println("Exception of type : $e")
+            e.printStackTrace()
+        }
+
+    }
+
+
+
+    private val sequenceButtonListener: View.OnClickListener = View.OnClickListener { v ->
+        Log.d("seqBtn pressed", "seqBtn pressed");
+        playMP3(this)
+
+
+
+
+    }
 
     class CustomDialogClass(context: Context) : Dialog(context) {
 
@@ -267,6 +310,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         Log.d("Build.PRODUCT", Build.PRODUCT);
 
+        val sequenceButton = findViewById<Button>(R.id.seqBtn)
+
         settingsButtons = arrayOf(
                 findViewById(R.id.settings_button1),
                 findViewById(R.id.settings_button2),
@@ -322,6 +367,8 @@ class MainActivity : AppCompatActivity() {
             settingsButtons[i].tag = i
             setButtonColor(i)
         }
+        //TODO figure out why this and the other sequenceButton place is making it crash
+        sequenceButton.setOnClickListener(sequenceButtonListener)
         showSelectedIndex()
         if (Build.PRODUCT != "sdk_gphone_x86_arm") {
             val mySoundMeter = SoundMeter()
