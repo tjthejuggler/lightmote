@@ -62,11 +62,7 @@ class MainActivity : AppCompatActivity() {
     var micButtons = arrayOf<ImageButton>()
     var micButtonXs = arrayOf<ImageView>()
 
-
-
-
-
-
+//237,35,85,172,19,81
     var ipAddresses = arrayOf(
             "192.168.43.85",
             "192.168.43.23",
@@ -218,14 +214,19 @@ class MainActivity : AppCompatActivity() {
             micButtonXs[buttonIndex].visibility = View.VISIBLE
         }
     }
-//when wwe click the seqBtn we want to make sure mic are off
+//when we click the seqBtn we want to make sure mic are off
     //then we want to make a toast that says you need something in the text field if there is nothing
     //then we want to start playing a song(maybe an mp3 location/file should be indicated in the first line of the textfield
         //regina mp3 has been downloaded, put it in root and hardcode it in here to filename
     //regina is there, but when we use this path it is not giving us the phone root it is giving the app root
     fun playMP3(context: Context) {
-        var fileName = "fidelity"
-        val path: String = context.getFilesDir().toString() + "/" + fileName + ".mp3"
+        var sequenceEditText = findViewById<View>(R.id.sequenceText) as EditText
+        var sequenceEditTextInput = sequenceEditText.text.toString()
+
+
+        var fileName = sequenceEditTextInput.split("\n")[0]
+        val path: String = "/storage/emulated/0/" + fileName + ".mp3"
+    //it is still saying permission denied even though i gave permission
         val player = MediaPlayer()
 
         try {
@@ -249,10 +250,6 @@ class MainActivity : AppCompatActivity() {
     private val sequenceButtonListener: View.OnClickListener = View.OnClickListener { v ->
         Log.d("seqBtn pressed", "seqBtn pressed");
         playMP3(this)
-
-
-
-
     }
 
     class CustomDialogClass(context: Context) : Dialog(context) {
@@ -311,6 +308,9 @@ class MainActivity : AppCompatActivity() {
         Log.d("Build.PRODUCT", Build.PRODUCT);
 
         val sequenceButton = findViewById<Button>(R.id.seqBtn)
+
+
+
 
         settingsButtons = arrayOf(
                 findViewById(R.id.settings_button1),

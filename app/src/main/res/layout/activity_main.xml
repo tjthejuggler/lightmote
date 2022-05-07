@@ -338,8 +338,9 @@
             android:layout_height="105dp"
             android:layout_marginLeft="160dp"
             android:layout_marginTop="290dp"
-            android:ems="10"
             android:background="#ffffff"
+            android:textColor="#000"
+            android:ems="10"
             android:gravity="start|top"
             android:inputType="textMultiLine" />
 
