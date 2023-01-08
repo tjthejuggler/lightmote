@@ -353,4 +353,17 @@
             android:layout_marginTop="295dp"
             />
 
+        <TextView
+            android:id="@+id/vibration_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/sequenceText"
+            android:layout_alignBottom="@id/sequenceText"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="-125dp"
+            android:layout_marginTop="-2dp"
+            android:layout_marginBottom="2dp"
+            android:background="@color/purple_200"
+            android:text="TextView" />
+
 </RelativeLayout>

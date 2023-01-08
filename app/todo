@@ -1,9 +1,7 @@
+audio stuff
 figure out how to make different notes be different color
 
-what else would be good for audience participation?
-
 maybe shrink mic buttons
-
     longhold it to change the threshold (duration, loudness, space between)
         make a 'return to default' option
     eventually in longhold menu make a toggle between simple and complex audio control
@@ -30,5 +28,7 @@ a way to load/save sequences
 music visualizer tutorial:
 https://www.dreamincode.net/forums/topic/303235-visualizing-sound-from-the-microphone/
 
+misc thoughts
+what else would be good for audience participation?
 
 

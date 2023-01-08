@@ -1,12 +1,22 @@
 package com.example.lightmote
 
+//add buffers after a vibration change
+//make buffer shrink as there are more vibrations, and get longer when there are less vibrations
+//we need to keep track of the last vibration and the number of vibrations in x seconds
+//the buffer time is based on the number of vibrations so we can do clear clicks, but also sped up fast stuff
+
 
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaPlayer
+import android.media.MediaPlayer.OnCompletionListener
 import android.media.MediaPlayer.OnPreparedListener
 import android.media.MediaRecorder
 import android.os.Build
@@ -23,6 +33,9 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.nio.ByteBuffer
 import kotlin.concurrent.thread
+import android.widget.TextView
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class SoundMeter {
@@ -55,7 +68,10 @@ class SoundMeter {
         }
 }
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SensorEventListener {
+
+    private lateinit var sensorManager: SensorManager
+    private lateinit var sensor: Sensor
 
     var settingsButtons = arrayOf<Button>()
     var colorButtons = arrayOf<Button>()
@@ -65,6 +81,8 @@ class MainActivity : AppCompatActivity() {
 //237,35,85,172,19,81
     var ipAddresses = arrayOf(
             "192.168.43.85",
+            "192.168.43.19",
+            "192.168.43.81",
             "192.168.43.23",
             "192.168.43.240"
     )
@@ -95,7 +113,9 @@ class MainActivity : AppCompatActivity() {
 
     var selectedIndex = arrayOf(0, 7, 14)
 
+    var currentVibration = 1.0F;
     var micOn = arrayOf(true, true, true)
+    var vibOn = arrayOf(true, true, true)
 
     fun sendColorChange(ip: String, color: ByteArray, buttonIndex: Int){
         val tvHello=findViewById(R.id.mytextView) as TextView;
@@ -216,49 +236,59 @@ class MainActivity : AppCompatActivity() {
     }
 //when we click the seqBtn we want to make sure mic are off
     //then we want to make a toast that says you need something in the text field if there is nothing
-    //then we want to start playing a song(maybe an mp3 location/file should be indicated in the first line of the textfield
-        //regina mp3 has been downloaded, put it in root and hardcode it in here to filename
-    //regina is there, but when we use this path it is not giving us the phone root it is giving the app root
     fun playMP3(context: Context) {
         var sequenceEditText = findViewById<View>(R.id.sequenceText) as EditText
         var sequenceEditTextInput = sequenceEditText.text.toString()
-
-
         var fileName = sequenceEditTextInput.split("\n")[0]
         val path: String = "/storage/emulated/0/" + fileName + ".mp3"
-    //it is still saying permission denied even though i gave permission
         val player = MediaPlayer()
-
         try {
             Log.d("seqBtn path", path);
             player.setDataSource(path)
             player.prepare()
             player.setOnPreparedListener(OnPreparedListener { mp -> mp.start() })
             player.prepareAsync()
-
+            var music_is_playing = true
+            player.setOnCompletionListener(OnCompletionListener {
+                music_is_playing = false
+            })
+            while (music_is_playing){
+                playColorSequence(this, player.getCurrentPosition())
+            }
         } catch (e: IllegalArgumentException) {
             e.printStackTrace()
         } catch (e: Exception) {
             println("Exception of type : $e")
             e.printStackTrace()
         }
-
     }
 
+    fun playColorSequence(context: Context, currentTime: Int){
+        var sequenceEditText = findViewById<View>(R.id.sequenceText) as EditText
+        var sequenceEditTextInput = sequenceEditText.text.toString()
+        for (line in sequenceEditTextInput.split("\n")){
+            var this_timestamp = line.split('"')[0]
+            //compare this timestamp to the current time that gets passed in
 
+            //split on the : and get the color keys
+
+            //convert the color keys to rgb or hex codes
+
+            //send commands and change the angle of the button for the ball that corresponds
+        }
+    }
 
     private val sequenceButtonListener: View.OnClickListener = View.OnClickListener { v ->
         Log.d("seqBtn pressed", "seqBtn pressed");
         playMP3(this)
+        //playColorSequence(this)
     }
 
     class CustomDialogClass(context: Context) : Dialog(context) {
-
         init {
             setCancelable(true)
         }
         private val yesButtonListener: View.OnClickListener = View.OnClickListener { v ->
-
             this.cancel()
         }
         override fun onCreate(savedInstanceState: Bundle?) {
@@ -289,8 +319,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
     private fun increaseSelectedIndexByOne(i: Int) {
         runOnUiThread {
             selectedIndex[i] = selectedIndex[i] + 1
@@ -301,23 +329,37 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //an array to hold all current_time logs
+    var current_time_logs = ArrayList<String>()
+
+    private fun log_current_time() {
+        //val sdf = SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z")
+        //unformated just number of milliseconds
+        val current_time = System.currentTimeMillis()
+        //add this time to current_time_logs
+        current_time_logs.add(current_time.toString())
+        //get all other items in array and get rid of any that start with a number that is more than 10 seconds ago
+
+
+        //val currentDateandTime = sdf.format(Date())
+        //Log.d("current time", current_time.toString())
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("onCreate", "onCreate");
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        //a textview called vibration_tv
+
         Log.d("Build.PRODUCT", Build.PRODUCT);
-
         val sequenceButton = findViewById<Button>(R.id.seqBtn)
-
-
-
-
         settingsButtons = arrayOf(
                 findViewById(R.id.settings_button1),
                 findViewById(R.id.settings_button2),
                 findViewById<Button>(R.id.settings_button3)
         )
-
         colorButtons = arrayOf(
                 findViewById(R.id.btnA1),
                 findViewById(R.id.btnA2),
@@ -373,7 +415,8 @@ class MainActivity : AppCompatActivity() {
         if (Build.PRODUCT != "sdk_gphone_x86_arm") {
             val mySoundMeter = SoundMeter()
             mySoundMeter.start()
-            var indicesCanIncreaseFromMic = true
+                var indicesCanIncreaseFromMic = true
+                var indicesCanIncreaseFromVib = true
                 thread {
                     while (true) {
                         if (micOn[0] || micOn[1] || micOn[2]) {
@@ -383,27 +426,86 @@ class MainActivity : AppCompatActivity() {
                                 e.printStackTrace()
                             }
                             if (mySoundMeter != null) {
-                                val amplitude = mySoundMeter.amplitude
-                                Log.i("AMPLITUDE", amplitude.toString())
-                                if (amplitude > 800) {
-                                    if (indicesCanIncreaseFromMic) {
-                                        indicesCanIncreaseFromMic = false
-                                        Log.i("INCREASE", "increase")
-                                        for (i in 0..2) {
-                                            if (micOn[i]) {
+//                                val amplitude = mySoundMeter.amplitude
+//                                Log.i("AMPLITUDE", amplitude.toString())
+//                                if (amplitude > 800) {
+//                                    if (indicesCanIncreaseFromMic) {
+//                                        indicesCanIncreaseFromMic = false
+//                                        Log.i("INCREASE", "increase")
+//                                        for (i in 0..2) {
+//                                            if (micOn[i]) {
+//                                                increaseSelectedIndexByOne(i)
+//                                            }
+//                                        }
+//                                    }
+//                                } else {
+//                                    indicesCanIncreaseFromMic = true
+//                                }
 
+                                val vibration_rate = mySoundMeter.amplitude
+                                Log.i("vibration_rate", vibration_rate.toString())
+                                if (currentVibration > 1.11) {
+                                    if (indicesCanIncreaseFromVib) {
+                                        indicesCanIncreaseFromVib = false
+                                        Log.i("INCREASE", "vib increase")
+                                        for (i in 0..2) {
+                                            if (vibOn[i]) {
                                                 increaseSelectedIndexByOne(i)
+                                                log_current_time()
                                             }
                                         }
                                     }
                                 } else {
-                                    indicesCanIncreaseFromMic = true
+                                    indicesCanIncreaseFromVib = true
                                 }
                             }
                         }
                     }
                 }
         }
+    }
+
+    override fun onSensorChanged(event: SensorEvent) {
+        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+            val x = event.values[0]
+            val y = event.values[1]
+            val z = event.values[2]
+
+
+            // Use a threshold to determine if the device is being shaken
+            var acceleration = ((x * x + y * y + z * z) / (SensorManager.GRAVITY_EARTH * SensorManager.GRAVITY_EARTH))
+            //only use 2 decimal places and make everything from .98 to 1.02 be equal to 1.00
+            if (acceleration >= 0.99 && acceleration <= 1.001) {
+                //set acceleration to 1
+                acceleration = 1.0F
+
+            }
+            //val accelerationRounded = String.format("%.2f", acceleration).toDouble()
+            val accelerationFormatted = String.format("%.3f", acceleration)
+
+            val textView: TextView = findViewById(R.id.vibration_tv) as TextView
+            //set textview text to acceleration
+            textView.text = accelerationFormatted.toString()
+            currentVibration = acceleration
+            if (acceleration > 1.02) {
+                //  Toast.makeText(this, "Device is shaking!", Toast.LENGTH_SHORT).show()
+
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(this)
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
+        // Do nothing
     }
 }
 
