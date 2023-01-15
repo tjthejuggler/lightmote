@@ -5,7 +5,15 @@ package com.example.lightmote
 //we need to keep track of the last vibration and the number of vibrations in x seconds
 //the buffer time is based on the number of vibrations so we can do clear clicks, but also sped up fast stuff
 
+//there should be a sequence or action of some sort that togels between my control and the automatic control. Would be great if the automatic was based on whatever I do.
+//
+//it should be easy to calibrate
 
+
+
+import AccelerationUtil
+import CompassUtil
+import OrientationUtil
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
@@ -409,23 +417,86 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             settingsButtons[i].tag = i
             setButtonColor(i)
         }
+        val usingMic = false
+        val usingAcceleration = false
+        val usingCompass = false
+        val usingOrientation = false
         //TODO figure out why this and the other sequenceButton place is making it crash
         sequenceButton.setOnClickListener(sequenceButtonListener)
         showSelectedIndex()
         if (Build.PRODUCT != "sdk_gphone_x86_arm") {
             val mySoundMeter = SoundMeter()
             mySoundMeter.start()
+            val myCompassUtil = CompassUtil(this)
+            myCompassUtil.start()
+            val myOrientationUtil = OrientationUtil(this)
+            myOrientationUtil.start()
+            val myAccelerationUtil = AccelerationUtil(this)
+            myAccelerationUtil.start()
                 var indicesCanIncreaseFromMic = true
                 var indicesCanIncreaseFromVib = true
+                var compassDirection = 0.0f
+                var acceleration = myAccelerationUtil.getAcceleration()
+                var orientation = myOrientationUtil.getOrientation()
+                var highest_azimuth = 0.0f
+                var lowest_azimuth = 0.0f
                 thread {
                     while (true) {
-                        if (micOn[0] || micOn[1] || micOn[2]) {
-                            try {
-                                Thread.sleep(50)
-                            } catch (e: InterruptedException) {
-                                e.printStackTrace()
+                        if (usingCompass) {
+                            compassDirection = myCompassUtil.getDirection()
+                            //log compass direction
+                            Log.d("compass direction", compassDirection.toString())
+                        }
+
+                        if (usingAcceleration) {
+                            acceleration = myAccelerationUtil.getAcceleration()
+                            //log acceleration
+                            //split acceleration into x, y, and z
+                            val x = acceleration[0]
+                            val y = acceleration[1]
+                            val z = acceleration[2]
+                            //log x, y, and z in a single log
+                            Log.d("acceleration", "x: $x, y: $y, z: $z")
+                        }
+
+                        if (usingOrientation) {
+                            orientation = myOrientationUtil.getOrientation()
+                            //log orientation
+                            //split orientation into azimuth, pitch, and roll
+                            val azimuth = orientation[0]
+                            val pitch = orientation[1]
+                            val roll = orientation[2]
+                            //log azimuth, pitch, and roll in a single log
+                            Log.d("azimuth, pitch, roll", "$azimuth, $pitch, $roll")
+                            //keep track of the highest and lowest azimuth
+                            if (azimuth > highest_azimuth) {
+                                highest_azimuth = azimuth
                             }
-                            if (mySoundMeter != null) {
+                            if (azimuth < lowest_azimuth) {
+                                lowest_azimuth = azimuth
+                            }
+                            //use the highest and lowest azimuth to convert the range to integers 0 through 6
+                            val azimuth_range = highest_azimuth - lowest_azimuth
+                            val azimuth_range_per_number = azimuth_range / 7
+                            val azimuth_number = ((azimuth - lowest_azimuth) / azimuth_range_per_number).toInt()
+                            Log.d("azimuthInt", azimuth_number.toString())
+
+                        }
+
+
+
+                        //todo move this azimuth stuff into the orientation util
+                        //todo keep track of previous azimuth int and change the color of he balls based on if a change happens
+                        //todo make azimuth be a smooth transition through colors instead of just changing colors
+
+                        if (usingMic) {
+                            if (micOn[0] || micOn[1] || micOn[2]) { //todo right now vibration stuff is under this mic stuff and it should be independent
+                                try {
+                                    Thread.sleep(50)
+                                } catch (e: InterruptedException) {
+                                    e.printStackTrace()
+                                }
+                                if (mySoundMeter != null) { //todo get this mic stuff turned back on
 //                                val amplitude = mySoundMeter.amplitude
 //                                Log.i("AMPLITUDE", amplitude.toString())
 //                                if (amplitude > 800) {
@@ -441,9 +512,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 //                                } else {
 //                                    indicesCanIncreaseFromMic = true
 //                                }
+                                }
+                            }
+                        }
 
-                                val vibration_rate = mySoundMeter.amplitude
-                                Log.i("vibration_rate", vibration_rate.toString())
+                        if (usingAcceleration){
+//                                val vibration_rate = mySoundMeter.amplitude
+//                                Log.i("vibration_rate", vibration_rate.toString())
                                 if (currentVibration > 1.11) {
                                     if (indicesCanIncreaseFromVib) {
                                         indicesCanIncreaseFromVib = false
@@ -459,11 +534,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                                     indicesCanIncreaseFromVib = true
                                 }
                             }
+
+
+
                         }
                     }
                 }
         }
-    }
+
 
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
