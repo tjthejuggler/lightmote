@@ -42,8 +42,10 @@ import java.net.InetAddress
 import java.nio.ByteBuffer
 import kotlin.concurrent.thread
 import android.widget.TextView
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.log
 
 
 class SoundMeter {
@@ -85,6 +87,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var colorButtons = arrayOf<Button>()
     var micButtons = arrayOf<ImageButton>()
     var micButtonXs = arrayOf<ImageView>()
+
+    val player = MediaPlayer()
 
 //237,35,85,172,19,81
     var ipAddresses = arrayOf(
@@ -154,6 +158,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         val r = Color.red(initColor)/2
         val g = Color.green(initColor)/2
         val b = Color.blue(initColor)/2
+        return byteArrayOf(r.toByte(), g.toByte(), b.toByte())
+    }
+
+    fun getByteArrayFromRGB(r: Int, g: Int, b: Int): ByteArray {
         return byteArrayOf(r.toByte(), g.toByte(), b.toByte())
     }
 
@@ -244,30 +252,129 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 //when we click the seqBtn we want to make sure mic are off
     //then we want to make a toast that says you need something in the text field if there is nothing
+
+    //make a function called getTimestamp that takes two inputs, a line number and a bunch of text
+    //the function will return the timestamp of the line number
+    fun getTimestamp(lineNumber: Int, text: String): Int{
+        Log.i("text", text.toString())
+        var lines = text.split("\n")
+        //log lineNumber here
+        Log.i("lineNumber", lineNumber.toString())
+
+        var line = lines[lineNumber]
+        Log.i("linexxx", line.toString())
+        //the timestamp is in this format       "1794": "x;255,255,0;x",
+        //we want to get the 1794
+        var timestamp = line.substring(1, line.indexOf(":"))
+        //remove the quotes
+        timestamp = timestamp.replace("\"", "")
+        //remove the space
+        timestamp = timestamp.replace(" ", "")
+        return timestamp.toInt()
+    }
+//make a void function called send_sequence_color_change
+    //this function will take in a line number and a bunch of text
+    fun send_sequence_color_change(lineNumber: Int, text: String) {
+        //get the line
+        var lines = text.split("\n")
+        var line = lines[lineNumber]
+        //the line will look like this  "1794": "255,0,0;255,255,0;0,0,255",
+        //it reprsents three different colors. ignore the timestamp and get teh three colors from these
+        var colors = line.substring(line.indexOf(":") + 2, line.length - 1).split(";").toMutableList()
+        //remove the quotes
+        colors[0] = colors[0].replace("\"", "")
+        colors[1] = colors[1].replace("\"", "")
+        colors[2] = colors[2].replace("\"", "")
+
+
+        //Log the three colors here
+        Log.i("color1", colors[0])
+        Log.i("color2", colors[1])
+        Log.i("color3", colors[2])
+        //send the color change
+        //sendColorChange(ipAddresses[buttonIndex], rgb, buttonIndex)
+
+        //use this
+        //loop through colors with an index
+        for (i in 0..colors.size - 1) {
+            //check if color == "x"
+            if (colors[i] != "x") {
+                //if it is x then do nothing
+                //get the color
+                var color = colors[i]
+                //get the rgb
+                var byte_rgb = getByteArrayFromRGB(
+                    color.split(",")[0].toInt(),
+                    color.split(",")[1].toInt(),
+                    color.split(",")[2].toInt()
+                )
+                //send the color change
+                sendColorChange(ipAddresses[i], byte_rgb, i)
+            }
+
+            //todo test color changes with real balls
+            //todo highlight currrent line
+            //todo autoscroll lines
+            //todo make it work with screen off
+            //todo hook up movements to color changes
+
+
+        }
+    }
+
+
+
+
+
     fun playMP3(context: Context) {
         var sequenceEditText = findViewById<View>(R.id.sequenceText) as EditText
         var sequenceEditTextInput = sequenceEditText.text.toString()
         var fileName = sequenceEditTextInput.split("\n")[0]
         val path: String = "/storage/emulated/0/" + fileName + ".mp3"
-        val player = MediaPlayer()
+        //val player = MediaPlayer()
         try {
-            Log.d("seqBtn path", path);
             player.setDataSource(path)
             player.prepare()
-            player.setOnPreparedListener(OnPreparedListener { mp -> mp.start() })
-            player.prepareAsync()
-            var music_is_playing = true
-            player.setOnCompletionListener(OnCompletionListener {
-                music_is_playing = false
-            })
-            while (music_is_playing){
-                playColorSequence(this, player.getCurrentPosition())
+            player.start()
+        } catch (e: IOException) {
+            Log.e("MainActivity", "prepare() failed")
+        }
+        //while the song is playing we want to run this code
+
+
+        var cur_color_line_number = 2
+        while (player.isPlaying) {
+            //we want to get the current position of the song
+
+            var currentPosition = player.currentPosition
+            if (currentPosition >= getTimestamp(cur_color_line_number, sequenceEditTextInput)) {
+                send_sequence_color_change(cur_color_line_number, sequenceEditTextInput)
+                cur_color_line_number += 1
             }
-        } catch (e: IllegalArgumentException) {
-            e.printStackTrace()
-        } catch (e: Exception) {
-            println("Exception of type : $e")
-            e.printStackTrace()
+            //
+            //todo while the song is playing we should be looking for the next timestamp and sending the color
+            //we always
+
+
+//        try {
+//            Log.d("seqBtn path", path);
+//            player.setDataSource(path)
+//            player.prepare()
+//            player.setOnPreparedListener(OnPreparedListener { mp -> mp.start() })
+//            player.prepareAsync()
+//            var music_is_playing = true
+//            player.setOnCompletionListener(OnCompletionListener {
+//                music_is_playing = false
+//            })
+//            while (music_is_playing){
+//                playColorSequence(this, player.getCurrentPosition())
+//            }
+//        } catch (e: IllegalArgumentException) {
+//            e.printStackTrace()
+//        } catch (e: Exception) {
+//            println("Exception of type : $e")
+//            e.printStackTrace()
+//        }
         }
     }
 
@@ -288,7 +395,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private val sequenceButtonListener: View.OnClickListener = View.OnClickListener { v ->
         Log.d("seqBtn pressed", "seqBtn pressed");
-        playMP3(this)
+        if (player.isPlaying()) {
+            player.stop()
+            player.reset()
+        }else{
+            playMP3(this)
+        }
         //playColorSequence(this)
     }
 
@@ -479,10 +591,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                             val azimuth_range = highest_azimuth - lowest_azimuth
                             val azimuth_range_per_number = azimuth_range / 7
                             val azimuth_number = ((azimuth - lowest_azimuth) / azimuth_range_per_number).toInt()
-                            Log.d("azimuthInt", azimuth_number.toString())
+                            //Log.d("azimuthInt", azimuth_number.toString())
 
                         }
-
+                        //todo sequence files
+                        //mp3 should be playable with a text sequence file
 
 
                         //todo move this azimuth stuff into the orientation util
