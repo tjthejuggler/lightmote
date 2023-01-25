@@ -25,9 +25,9 @@ class CompassUtil(context: Context) : SensorEventListener {
         val values = event.values
         val azimuth = Math.atan2((-values[0]).toDouble(), values[1].toDouble())
         currentDirection = Math.toDegrees(azimuth).toFloat()
-        if (currentDirection < 0) {
+        //if (currentDirection < 0) {
             currentDirection += 360
-        }
+        //}
     }
 
 

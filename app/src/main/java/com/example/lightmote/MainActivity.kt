@@ -48,6 +48,7 @@ import java.util.*
 import kotlin.math.log
 
 
+
 class SoundMeter {
     private var ar: AudioRecord? = null
     private var minSize = 0
@@ -178,6 +179,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             buttonIndex in 7..13 -> ipIndex = 1
             buttonIndex in 14..20 -> ipIndex = 2
         }
+        Log.d("button color", ipAddresses[ipIndex]+", "+colors[buttonIndex].toString()+", "+buttonIndex.toString())
         sendColorChange(ipAddresses[ipIndex], colors[buttonIndex], buttonIndex)
     }
 
@@ -274,6 +276,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 //make a void function called send_sequence_color_change
     //this function will take in a line number and a bunch of text
+
+
+
     fun send_sequence_color_change(lineNumber: Int, text: String) {
         //get the line
         var lines = text.split("\n")
@@ -304,16 +309,19 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 var color = colors[i]
                 //get the rgb
                 var byte_rgb = getByteArrayFromRGB(
-                    color.split(",")[0].toInt(),
-                    color.split(",")[1].toInt(),
-                    color.split(",")[2].toInt()
+                    color.split(",")[0].toInt()/2,
+                    color.split(",")[1].toInt()/2,
+                    color.split(",")[2].toInt()/2
                 )
                 //send the color change
-                sendColorChange(ipAddresses[i], byte_rgb, i)
+                sendColorChange(ipAddresses[0], byte_rgb, i)
             }
 
-            //todo test color changes with real balls
-            //todo highlight currrent line
+            //todo i need to send continuous color changes based on phone position sensors
+            //  the color set by the timestamps will be recorded and become the new base color for that ball
+            //  (an alternative to this would be to only do color changes when the timestamps say to,
+            //   but then at those times take into account the phone position sensors)
+            //todo highlight current line
             //todo autoscroll lines
             //todo make it work with screen off
             //todo hook up movements to color changes
@@ -465,6 +473,30 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         //Log.d("current time", current_time.toString())
     }
 
+    fun map(oldValue: Float, oldMin: Float, oldMax: Float, newMin: Float, newMax: Float): Float {
+        return (((oldValue - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin
+    }
+
+    fun mapToColor(oldValue: Float, oldMax: Float): ByteArray {
+        val mappedValue = map(oldValue, 0f, oldMax, 0f, 360f)
+        val color = Color.HSVToColor(floatArrayOf(mappedValue, 1.0f, 1.0f))
+        val hsv = FloatArray(3)
+        Color.colorToHSV(color, hsv)
+        val red = (hsv[0] * 128).toInt()
+        val green = (hsv[1] * 128).toInt()
+        val blue = (hsv[2] * 128).toInt()
+        //create a bytearray to hold the rgb values
+        var rgb = getByteArrayFromRGB(
+            red,
+            green,
+           blue
+        )
+
+        //rgb = (red shl 24) or (green shl 16) or (blue shl 8) or 0xff
+        return rgb
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -531,7 +563,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
         val usingMic = false
         val usingAcceleration = false
-        val usingCompass = false
+        val usingCompass = true
         val usingOrientation = false
         //TODO figure out why this and the other sequenceButton place is making it crash
         sequenceButton.setOnClickListener(sequenceButtonListener)
@@ -558,6 +590,30 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                             compassDirection = myCompassUtil.getDirection()
                             //log compass direction
                             Log.d("compass direction", compassDirection.toString())
+
+                            val maxValue: Float = 719f
+                            val color = mapToColor(compassDirection, maxValue)
+                            Log.d("compass color", ipAddresses[0] +", "+color.toString())
+                            //192.168.43.85, , 2
+                            //var temp_byte_array = "[B@bb44aa2"
+                            runOnUiThread {
+                                sendColorChange(ipAddresses[0], color, 0)
+                            }
+                            //todo figure out why the compass color is flickering so much and seems not to be hooked up to the compass
+                            //todo try out other sensors
+
+                            //todo maybe the color selected on the app should be the base color
+
+                            //wait a second
+                            Thread.sleep(10)
+                            //todo if i am doing this continuously then i need to make sure that i am not doing it too fast
+                            //  one option is to only send color changes if there has been a large enough sensor change
+                            //  another option is to send lots of color changes.
+
+                            //this should use the current base color and then adjust it based on the compass direction
+                            //todo save the 3 base colors so you can use them here in the sensors
+
+                            //todo app shouldnt crash when the timestamps run out. it should just go back to normal mode
                         }
 
                         if (usingAcceleration) {
